@@ -60,22 +60,19 @@ go run excel_to_yml.go -input ../мой_шаблон.xlsx -output ../мой_фи
 #### Для macOS:
 
 ```bash
-cd src
-go build -o ../yandex_fid_mac excel_to_yml.go
+go build -o yandex_fid_mac excel_to_yml.go
 ```
 
 #### Для Windows (кросс-компиляция на macOS/Linux):
 
 ```bash
-cd src
-GOOS=windows GOARCH=amd64 go build -o ../yandex_fid_windows.exe excel_to_yml.go
+GOOS=windows GOARCH=amd64 go build -o yandex_fid_windows.exe excel_to_yml.go
 ```
 
 #### Для Linux:
 
 ```bash
-cd src
-GOOS=linux GOARCH=amd64 go build -o ../yandex_fid_linux excel_to_yml.go
+GOOS=linux GOARCH=amd64 go build -o yandex_fid_linux excel_to_yml.go
 ```
 
 После сборки вы можете запустить программу:
