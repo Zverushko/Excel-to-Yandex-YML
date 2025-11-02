@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<yml_catalog date="2025-11-02 14:38">
+  <shop>
+    <name>Мой магазин</name>
+    <company>Моя компания</company>
+    <url>https://example.com</url>
+    <currencies>
+      <currency id="RUR" rate="1"></currency>
+      <currency id="USD" rate="1"></currency>
+      <currency id="EUR" rate="1"></currency>
+    </currencies>
+    <categories>
+      <category id="1">Одежда</category>
+      <category id="2" parentId="1">Мужская одежда</category>
+      <category id="3" parentId="1">Женская одежда</category>
+      <category id="4" parentId="1">Детская одежда</category>
+      <category id="5" parentId="3">Женские тельняшки</category>
+    </categories>
+    <offers>
+      <offer id="1" available="true">
+        <url>https://aglaemichon.com/winter_oversize-vest</url>
+        <price>3650.00</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>5</categoryId>
+        <picture>https://optim.tildacdn.com/tild3030-3132-4639-a536-373561393261/-/format/webp/4_1.jpg.webp</picture>
+        <name>Тёплая женская тельняшка оверсайз</name>
+        <vendor>Aglae Michon</vendor>
+        <description>Стильная тёплая женская тельняшка в стиле оверсайз доступна в размерах от 42 до 60 на aglaemichon.com. Изготовлена из плотного 100% хлопкового футера с мягким начесом внутри, обеспечивая высокий уровень комфорта. Широкий диапазон размеров гарантирует подходящую посадку для каждой женщины. Свободный силуэт, опущенная линия плеча</description>
+        <sales_notes>Предоплата 100%</sales_notes>
+        <param name="Единица измерения">RU</param>
+      </offer>
+      <offer id="2" available="true">
+        <url>https://aglaemichon.com/vest_oversize_winter3/4</url>
+        <price>3650.00</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>5</categoryId>
+        <picture>https://optim.tildacdn.com/tild3834-6437-4138-b539-333130616431/-/format/webp/34___1.jpg.webp</picture>
+        <name>Теплая женская тельняшка оверсайз с рукавом 3/4</name>
+        <vendor>Aglae Michon</vendor>
+        <description>Теплая тельняшка из плотного 100% хлопкового футера с мягким начесом внутри. Свободный силуэт, опущенная линия плеча. Рукав 3/4 с декоративным отворотом. Вырез лодочка, немного углубленная сзади. Декоративный шов на спине и плечевые швы наружу.</description>
+        <sales_notes>Предоплата 100%</sales_notes>
+        <param name="Единица измерения">RU</param>
+      </offer>
+      <offer id="3" available="true">
+        <url>https://aglaemichon.com/vest_oversize_one-piece-sleeve</url>
+        <price>3650.00</price>
+        <currencyId>RUR</currencyId>
+        <categoryId>5</categoryId>
+        <picture>https://optim.tildacdn.com/tild3665-6431-4536-a532-326234613363/-/format/webp/3_dblue.png.webp</picture>
+        <name>Тёплая женская тельняшка оверсайз с вырезом лодочка</name>
+        <vendor>Aglae Michon</vendor>
+        <description>Тёплая женская тельняшка из плотного 100% хлопкового футера с мягким начесом внутри обеспечивает тепло и комфорт в холодные дни. Свободный силуэт придает ей легкость и приятную посадку. Вырез в форме лодочки добавляет изысканности и женственности. Рукав широкий, слегка удлиненный, с декоративным швом наружу по всей длине придает тельняшке стильный и элегантный вид.</description>
+        <sales_notes>Предоплата 100%</sales_notes>
+        <param name="Единица измерения">RU</param>
+      </offer>
+    </offers>
+  </shop>
+</yml_catalog>
