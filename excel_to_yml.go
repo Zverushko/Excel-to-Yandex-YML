@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/xml"
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -148,7 +150,6 @@ func parseExcelToYML(inputFile, outputFile string) error {
 		return fmt.Errorf("ошибка при записи XML: %w", err)
 	}
 
-	fmt.Printf("YML-файл успешно создан: %s\n", outputFile)
 	return nil
 }
 
@@ -182,8 +183,8 @@ func readShopSettings(xlsx *excelize.File) (ShopData, error) {
 			continue // Пропускаем заголовок
 		}
 		if len(row) >= 2 {
-			key := row[0]
-			value := row[1]
+			key := strings.TrimSpace(row[0])
+			value := strings.TrimSpace(row[1])
 			switch key {
 			case "Название магазина":
 				shopData.Name = value
@@ -239,8 +240,8 @@ func readCurrencies(xlsx *excelize.File) ([]Currency, error) {
 			continue // Пропускаем заголовок
 		}
 		if len(row) >= 2 {
-			id := row[0]
-			rate := row[1]
+			id := strings.TrimSpace(row[0])
+			rate := strings.TrimSpace(row[1])
 			if id != "" {
 				currencies = append(currencies, Currency{ID: id, Rate: rate})
 			}
@@ -285,11 +286,11 @@ func readCategories(xlsx *excelize.File) ([]Category, error) {
 			continue // Пропускаем заголовок
 		}
 		if len(row) >= 2 {
-			id := row[0]
-			name := row[1]
+			id := strings.TrimSpace(row[0])
+			name := strings.TrimSpace(row[1])
 			parentID := ""
 			if len(row) >= 3 {
-				parentID = row[2]
+				parentID = strings.TrimSpace(row[2])
 			}
 
 			if id != "" && name != "" {
@@ -338,7 +339,7 @@ func readProducts(xlsx *excelize.File) ([]ProductData, error) {
 	var colIndexes = make(map[string]int)
 	if len(rows) > 0 {
 		for i, cell := range rows[0] {
-			colIndexes[cell] = i
+			colIndexes[strings.TrimSpace(cell)] = i
 		}
 	} else {
 		return products, fmt.Errorf("лист '%s' не содержит данных", sheetName)
@@ -359,11 +360,11 @@ func readProducts(xlsx *excelize.File) ([]ProductData, error) {
 		var id, name string
 
 		if idIdx, ok := colIndexes["ID товара"]; ok && len(row) > idIdx {
-			id = row[idIdx]
+			id = strings.TrimSpace(row[idIdx])
 		}
 
 		if nameIdx, ok := colIndexes["Название товара"]; ok && len(row) > nameIdx {
-			name = row[nameIdx]
+			name = strings.TrimSpace(row[nameIdx])
 		}
 
 		// Если нет ID или названия, пропускаем товар
@@ -378,28 +379,32 @@ func readProducts(xlsx *excelize.File) ([]ProductData, error) {
 
 		// Заполняем остальные поля, если они есть
 		if idx, ok := colIndexes["Доступность (true/false)"]; ok && len(row) > idx {
-			product.Available = strings.ToLower(row[idx]) == "да" || strings.ToLower(row[idx]) == "true"
+			val := strings.ToLower(strings.TrimSpace(row[idx]))
+			product.Available = val == "да" || val == "true"
 		} else {
 			product.Available = true // По умолчанию товар доступен
 		}
 
 		if idx, ok := colIndexes["URL товара"]; ok && len(row) > idx {
-			product.URL = row[idx]
+			product.URL = strings.TrimSpace(row[idx])
 		}
 
 		if idx, ok := colIndexes["Цена"]; ok && len(row) > idx {
-			price, err := strconv.ParseFloat(row[idx], 64)
+			val := strings.TrimSpace(row[idx])
+			val = strings.ReplaceAll(val, ",", ".")
+			val = strings.ReplaceAll(val, " ", "") // Убираем пробелы (например 1 000)
+			price, err := strconv.ParseFloat(val, 64)
 			if err == nil {
 				product.Price = price
 			}
 		}
 
 		if idx, ok := colIndexes["Валюта (ID)"]; ok && len(row) > idx {
-			product.CurrencyID = row[idx]
+			product.CurrencyID = strings.TrimSpace(row[idx])
 		}
 
 		if idx, ok := colIndexes["ID категории"]; ok && len(row) > idx {
-			product.CategoryID = row[idx]
+			product.CategoryID = strings.TrimSpace(row[idx])
 		}
 
 		if idx, ok := colIndexes["URL изображения"]; ok && len(row) > idx {
@@ -413,22 +418,22 @@ func readProducts(xlsx *excelize.File) ([]ProductData, error) {
 		}
 
 		if idx, ok := colIndexes["Производитель"]; ok && len(row) > idx {
-			product.Vendor = row[idx]
+			product.Vendor = strings.TrimSpace(row[idx])
 		}
 
 		if idx, ok := colIndexes["Описание"]; ok && len(row) > idx {
-			product.Description = row[idx]
+			product.Description = strings.TrimSpace(row[idx])
 		}
 
 		if idx, ok := colIndexes["Примечания"]; ok && len(row) > idx {
-			product.SalesNotes = row[idx]
+			product.SalesNotes = strings.TrimSpace(row[idx])
 		}
 
 		// Обрабатываем параметры товара
 		for key, idx := range colIndexes {
 			if strings.HasPrefix(key, "Параметр:") && len(row) > idx {
 				paramName := strings.TrimPrefix(key, "Параметр:")
-				paramValue := row[idx]
+				paramValue := strings.TrimSpace(row[idx])
 				if paramValue != "" {
 					// Проверяем, есть ли единица измерения
 					parts := strings.Split(paramName, "(")
@@ -532,22 +537,50 @@ func writeXML(ymlCatalog YMLCatalog, outputFile string) error {
 	return nil
 }
 
+func waitForExit() {
+	fmt.Println("\nНажмите Enter, чтобы выйти...")
+	bufio.NewReader(os.Stdin).ReadBytes('\n')
+}
+
 func main() {
+	// Определяем директорию исполняемого файла
+	exePath, err := os.Executable()
+	if err != nil {
+		fmt.Printf("Ошибка при получении пути исполняемого файла: %v\n", err)
+		waitForExit()
+		os.Exit(1)
+	}
+	exeDir := filepath.Dir(exePath)
+
+	// Формируем полные пути по умолчанию
+	defaultInputPath := filepath.Join(exeDir, DefaultTemplate)
+	defaultOutputPath := filepath.Join(exeDir, DefaultOutput)
+
 	// Парсим аргументы командной строки
-	inputFile := flag.String("input", DefaultTemplate, "Путь к Excel файлу с данными")
-	outputFile := flag.String("output", DefaultOutput, "Путь для сохранения YML файла")
+	inputFile := flag.String("input", defaultInputPath, "Путь к Excel файлу с данными")
+	outputFile := flag.String("output", defaultOutputPath, "Путь для сохранения YML файла")
 	flag.Parse()
 
 	// Проверяем существование входного файла
 	if _, err := os.Stat(*inputFile); os.IsNotExist(err) {
-		fmt.Printf("Ошибка: файл %s не существует\n", *inputFile)
-		os.Exit(1)
+		// Если файл не найден по полному пути, пробуем найти его в текущей директории (для обратной совместимости)
+		if _, err := os.Stat(DefaultTemplate); err == nil {
+			*inputFile = DefaultTemplate
+		} else {
+			fmt.Printf("Ошибка: файл %s не существует\n", *inputFile)
+			waitForExit()
+			os.Exit(1)
+		}
 	}
 
 	// Обрабатываем Excel и создаем YML
-	err := parseExcelToYML(*inputFile, *outputFile)
+	err = parseExcelToYML(*inputFile, *outputFile)
 	if err != nil {
 		fmt.Printf("Ошибка: %s\n", err)
+		waitForExit()
 		os.Exit(1)
 	}
+
+	fmt.Printf("YML-файл успешно создан: %s\n", *outputFile)
+	waitForExit()
 }

@@ -36,9 +36,6 @@ go mod download
 ### Запуск программы
 
 ```bash
-# Перейти в папку src
-cd src
-
 # Запустить программу
 go run excel_to_yml.go
 ```
@@ -48,7 +45,7 @@ go run excel_to_yml.go
 Вы также можете указать другие имена файлов:
 
 ```bash
-go run excel_to_yml.go -input ../мой_шаблон.xlsx -output ../мой_фид.xml
+go run excel_to_yml.go -input мой_шаблон.xlsx -output мой_фид.xml
 ```
 
 ### Сборка исполняемого файла
